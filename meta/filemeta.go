@@ -1,8 +1,8 @@
 package meta
 
 import (
-	"sort"
 	mydb "filestore-server/db"
+	"sort"
 )
 
 //FileMeta: 文件的一些信息
@@ -36,10 +36,10 @@ func GetFileMeta(fileSha1 string) FileMeta{
 }
 
 //GetFileMetaDB: 从mysql获取文件信息
-func GetFileMetaDB(fileSha1 string) (FileMeta, error) {
+func GetFileMetaDB(fileSha1 string) (*FileMeta, error) {
 	tfile, err := mydb.GetFileMeta(fileSha1)
-	if err != nil {
-		return FileMeta{}, nil
+	if err != nil || tfile == nil {
+		return nil, nil
 	}
 	fmeta := FileMeta{
 		FileSha1: tfile.FileHash,
@@ -47,7 +47,7 @@ func GetFileMetaDB(fileSha1 string) (FileMeta, error) {
 		FileSize: tfile.FileSize.Int64,
 		Location: tfile.FileAddr.String,
 	}
-	return fmeta, nil
+	return &fmeta, nil
 }
 
 //GetLastFileMetas: 获取批量的文件信息列表
