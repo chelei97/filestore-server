@@ -6,19 +6,21 @@ import (
 	"time"
 )
 
-//UserFile: 文件结构体
+// UserFile : 用户文件表结构体
 type UserFile struct {
-	UserName string
-	FileHash string
-	FileName string
-	FileSize int64
-	UploadAt string
+	UserName    string
+	FileHash    string
+	FileName    string
+	FileSize    int64
+	UploadAt    string
 	LastUpdated string
 }
 
-//OnUserFileUploadFinished: 更新文件表
+// OnUserFileUploadFinished : 更新用户文件表
 func OnUserFileUploadFinished(username, filehash, filename string, filesize int64) bool {
-	stmt, err := mydb.DBConn().Prepare("insert ignore into tbl_user_file (`user_name`, `file_sha1`, `file_name`, `file_size`, `upload_at`) values (?,?,?,?,?)")
+	stmt, err := mydb.DBConn().Prepare(
+		"insert ignore into tbl_user_file (`user_name`,`file_sha1`,`file_name`," +
+			"`file_size`,`upload_at`) values (?,?,?,?,?)")
 	if err != nil {
 		return false
 	}
@@ -31,9 +33,11 @@ func OnUserFileUploadFinished(username, filehash, filename string, filesize int6
 	return true
 }
 
-//QueryUserFileMetas: 获取文件信息
+// QueryUserFileMetas : 批量获取用户文件信息
 func QueryUserFileMetas(username string, limit int) ([]UserFile, error) {
-	stmt, err := mydb.DBConn().Prepare("select file_sha1, file_name, file_size, upload_at, last_update from tbl_user_file where user_name = ? limit ?")
+	stmt, err := mydb.DBConn().Prepare(
+		"select file_sha1,file_name,file_size,upload_at," +
+			"last_update from tbl_user_file where user_name=? limit ?")
 	if err != nil {
 		return nil, err
 	}
@@ -43,10 +47,12 @@ func QueryUserFileMetas(username string, limit int) ([]UserFile, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	var userFiles []UserFile
 	for rows.Next() {
 		ufile := UserFile{}
-		err = rows.Scan(&ufile.FileHash, &ufile.FileName, &ufile.FileSize, &ufile.UploadAt, &ufile.LastUpdated)
+		err = rows.Scan(&ufile.FileHash, &ufile.FileName, &ufile.FileSize,
+			&ufile.UploadAt, &ufile.LastUpdated)
 		if err != nil {
 			fmt.Println(err.Error())
 			break

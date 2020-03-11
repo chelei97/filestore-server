@@ -19,6 +19,7 @@ func HTTPInterceptor(h http.HandlerFunc) http.HandlerFunc {
 				http.Redirect(w, r, "/static/view/signin.html", http.StatusFound)
 				return
 			}
+			
 			h(w, r)
 		})
 }

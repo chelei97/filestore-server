@@ -2,10 +2,9 @@ package meta
 
 import (
 	mydb "filestore-server/db"
-	"sort"
 )
 
-//FileMeta: 文件的一些信息
+//FileMeta:文件元信息结构
 type FileMeta struct {
 	FileSha1 string
 	FileName string
@@ -16,30 +15,25 @@ type FileMeta struct {
 
 var fileMetas map[string]FileMeta
 
-func init(){
+func init() {
 	fileMetas = make(map[string]FileMeta)
 }
 
-//UpdateFileMeta: 新增/更新文件信息的操作
+//UpdateFileMeta:新增/更新文件元信息
 func UpdateFileMeta(fmeta FileMeta) {
 	fileMetas[fmeta.FileSha1] = fmeta
 }
 
-//UpdateFileMetaDB: 新增文件信息到mysql中
+//UpdateFileMetaDB:新增/更新文件元信息到mysql中
 func UpdateFileMetaDB(fmeta FileMeta) bool {
-	return mydb.OnFileUploadFinished(fmeta.FileSha1, fmeta.FileName, fmeta.Location, fmeta.FileSize)
+	return mydb.OnFileUploadFinished(fmeta.FileSha1, fmeta.FileName, fmeta.FileSize, fmeta.Location)
 }
 
-//GetFileMeta: 获取文件对象
-func GetFileMeta(fileSha1 string) FileMeta{
-	return fileMetas[fileSha1]
-}
-
-//GetFileMetaDB: 从mysql获取文件信息
+//GetFileMetaDB:从mysql获取文件元信息
 func GetFileMetaDB(fileSha1 string) (*FileMeta, error) {
 	tfile, err := mydb.GetFileMeta(fileSha1)
-	if err != nil || tfile == nil {
-		return nil, nil
+	if tfile == nil || err != nil {
+		return nil, err
 	}
 	fmeta := FileMeta{
 		FileSha1: tfile.FileHash,
@@ -50,18 +44,12 @@ func GetFileMetaDB(fileSha1 string) (*FileMeta, error) {
 	return &fmeta, nil
 }
 
-//GetLastFileMetas: 获取批量的文件信息列表
-func GetLastFileMetas(count int) []FileMeta {
-	fMetaArray := make([]FileMeta, len(fileMetas))
-	for _, v := range fileMetas {
-		fMetaArray = append(fMetaArray, v)
-	}
-
-	sort.Sort(ByUploadTime(fMetaArray))
-	return fMetaArray[0:count]
+//GetFileMeta:通过Sha1获取文件的元信息对象
+func GetFileMeta(fileSha1 string) FileMeta {
+	return fileMetas[fileSha1]
 }
 
-//RemoveFileMeta: 删除
+// RemoveFileMeta : 删除元信息
 func RemoveFileMeta(fileSha1 string) {
 	delete(fileMetas, fileSha1)
 }

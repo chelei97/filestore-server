@@ -1,4 +1,4 @@
-package meta
+package client
 
 import "time"
 
